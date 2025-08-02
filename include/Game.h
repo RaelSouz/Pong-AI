@@ -3,15 +3,19 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
+#include <Objects/Pad.h>
+
 class Game {
     private:
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
         SDL_Event event;
 
-        int window_w, window_h;
+        int win_w, win_h;
         int frameDelay;
         bool inGame;
+        Pad* padL;
+        Pad* padR;
 
         void eventHandle();
         void drawScene();
