@@ -4,7 +4,7 @@
 
 class Pad : public Object {
     public:
-        Pad(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color);
+        Pad(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
         ~Pad();
         
         void setSpeed(float speed);

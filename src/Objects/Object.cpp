@@ -1,8 +1,7 @@
 #include <Objects/Object.h>
 
-Object::Object(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color) :
-    rect(rect), color(color), ptrRenderer(&(*renderer)) {
-    SDL_GetWindowSize(window, &win_w, &win_h);
+Object::Object(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+    rect(rect), color(color), ptrRenderer(&(*renderer)), activeArea(activeArea) {
 }
 
 Object::~Object() = default;

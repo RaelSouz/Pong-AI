@@ -7,8 +7,9 @@
 
 class Game {
     private:
-        SDL_Window* window = nullptr;
-        SDL_Renderer* renderer = nullptr;
+        SDL_Window* window;
+        SDL_Renderer* renderer;
+        SDL_Texture* background;
         SDL_Event event;
 
         int win_w, win_h;
@@ -20,6 +21,7 @@ class Game {
         void eventHandle();
         void drawScene();
         void renderScene();
+        void createBackground();
 
     public:
 

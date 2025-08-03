@@ -1,7 +1,7 @@
 #include <Objects/Pad.h>
 
-Pad::Pad(SDL_Window* window, SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color) :
-    Object(window, renderer, rect, color) { }
+Pad::Pad(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+    Object(renderer, activeArea, rect, color) { }
 
 Pad::~Pad() { 
     ptrRenderer = nullptr;
@@ -12,12 +12,12 @@ void Pad::setSpeed(float speed) {
 }
 
 int Pad::collideWall() {
-    if(rect.y <= 0) {
-        rect.y = 0;
+    if(rect.y <= activeArea.y) {
+        rect.y = activeArea.y;
         return 1;   // Colisão superior
     }
-    else if((rect.y + rect.h) >= win_h) {
-        rect.y = (win_h - rect.h);
+    else if((rect.y + rect.h) >= activeArea.y + activeArea.h) {
+        rect.y = ((activeArea.y + activeArea.h) - rect.h);
         return 2;   // Colisão inferior
     }
     else return 0;  // Sem colisões
