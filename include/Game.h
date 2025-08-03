@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <Objects/Pad.h>
+#include <Objects/Ball.h>
 
 class Game {
     private:
@@ -17,6 +18,7 @@ class Game {
         bool inGame;
         Pad* padL;
         Pad* padR;
+        Ball* ball;
 
         void eventHandle();
         void drawScene();

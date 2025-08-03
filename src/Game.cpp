@@ -5,6 +5,9 @@
 #define PAD_HEIGHT 100
 #define PAD_SPEED 6
 #define PAD_COLOR {255, 255, 255, 255}
+#define BALL_SIZE 15
+#define BALL_SPEED 5
+#define BALL_COLOR {255, 0, 0, 255}
 #define V_BORDER_H 15
 #define V_DOT_H 30
 #define V_DOT_W 15
@@ -65,6 +68,12 @@ int Game::init() {
     );
     padR->setSpeed(PAD_SPEED);
 
+    ball = new Ball(
+        renderer, activeArea,
+        {.w = BALL_SIZE, .h = BALL_SIZE}, BALL_COLOR
+    );
+    ball->setSpeed(BALL_SPEED);
+
     inGame = true;
     return 0;
 }
@@ -91,6 +100,8 @@ void Game::handle() {
         if(kbState[SDL_SCANCODE_UP]) padR->move(true);  // Teclas jogador 2
         else if(kbState[SDL_SCANCODE_DOWN]) padR->move(false);
 
+        ball->move(padL, padR);
+
         drawScene();
         renderScene();
     }
@@ -100,6 +111,7 @@ void Game::drawScene() {
     SDL_RenderCopy(renderer, background, NULL, NULL);
     padL->draw();
     padR->draw();
+    ball->draw();
 }
 
 void Game::renderScene() {

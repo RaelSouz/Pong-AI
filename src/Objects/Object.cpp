@@ -23,6 +23,14 @@ SDL_Color Object::getColor() {
     return color;
 }
 
+void Object::setSpeed(int speed) {
+    this->speed = speed;
+}
+
+int Object::getSpeed() {
+    return speed;
+}
+
 void Object::setPos(int x, int y) {
     rect.x = x, rect.y = y;
 }
