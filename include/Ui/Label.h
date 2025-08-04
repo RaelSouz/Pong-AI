@@ -4,7 +4,6 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <string>
-#include <unistd.h>
 
 struct Font {
     TTF_Font* src = nullptr;

@@ -54,7 +54,6 @@ int utils::initFonts() {
 }
 
 Font* utils::openFont(std::string path, float size) {
-    chdir("..");
 	Font* font = new Font;
     font->src = TTF_OpenFont(path.c_str(), size);
 	if (font->src == NULL) {
