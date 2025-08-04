@@ -5,6 +5,7 @@
 
 #include <Objects/Pad.h>
 #include <Objects/Ball.h>
+#include <Ui/Label.h>
 
 class Game {
     private:
@@ -14,11 +15,15 @@ class Game {
         SDL_Event event;
 
         int win_w, win_h;
+        int scoreL, scoreR;
         int frameDelay;
-        bool inGame;
+        bool inGame, paused;
         Pad* padL;
         Pad* padR;
         Ball* ball;
+        Font* scoreFont;
+        Label* scoreLabelL;
+        Label* scoreLabelR;
 
         void eventHandle();
         void drawScene();

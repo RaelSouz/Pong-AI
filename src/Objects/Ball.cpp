@@ -63,7 +63,7 @@ void Ball::colisionPad(Pad* pad) {
         isInsideRect((rect.x + rect.w), rect.y, &rect2)  // Ponto 2
         && isInsideRect((rect.x + rect.w), (rect.y + rect.w), &rect2)  // Ponto 4
     ) { // Colisão na lateral esquerda
-        rect.x = rect2.x - rect.w;
+        rect.x = rect2.x - rect2.w;
         speedX *= -1;
     } else if(
         isInsideRect(rect.x, rect.y, &rect2)  // Ponto 1

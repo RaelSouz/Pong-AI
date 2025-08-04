@@ -13,12 +13,20 @@
 #define V_DOT_W 15
 #define V_BORDER_COLOR 170, 170, 170, 255
 #define H_PADDING 60
+#define FONT_PATH "assets/fonts/Press_Start_2P/PressStart2P-Regular.ttf"
+#define FONT_SCORE_SIZE 32
+#define FONT_SCORE_COLOR {170, 170, 170, 255}
+#define V_SCORE_PADDING 60
+#define H_SCORE_PADDING 60
 
 Game::Game(int width, int height, int frameRate) {
     win_w = width, win_h = height;
+    scoreL = 0, scoreR = 0;
     frameDelay = 1000 / frameRate;
     inGame = false;
     window = nullptr, renderer = nullptr, background = nullptr;
+    padL = nullptr, padR = nullptr, ball = nullptr;
+    scoreFont = nullptr, scoreLabelL = nullptr, scoreLabelR = nullptr;
 }
 
 Game::~Game() {
@@ -26,6 +34,9 @@ Game::~Game() {
     SDL_DestroyRenderer(renderer);
     delete padL;
     delete padR;
+    delete scoreLabelL;
+    delete scoreLabelR;
+    utils::closeFont(scoreFont);
     SDL_Quit();
 }
 
@@ -48,7 +59,17 @@ int Game::init() {
     }
 
     if((background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, win_w, win_h)) == NULL) { // Inicializando o background
-        std::cerr << "Erro ao inicializar a texxtura do background: " << SDL_GetError() << std::endl;
+        std::cerr << "Erro ao inicializar a textura do background: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    if(utils::initFonts() == 1) { // Criação do renderer
+        std::cerr << "Erro ao inicializar as fonts: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    if((scoreFont = utils::openFont(FONT_PATH, FONT_SCORE_SIZE)) == NULL) { // Criação do renderer
+        std::cerr << "Erro ao abrir a fonte: " << FONT_PATH << " " << SDL_GetError() << std::endl;
         return 1;
     }
 
@@ -74,7 +95,11 @@ int Game::init() {
     );
     ball->setSpeed(BALL_SPEED);
 
+    scoreLabelL = new Label(renderer, scoreFont, FONT_SCORE_COLOR);
+    scoreLabelR = new Label(renderer, scoreFont, FONT_SCORE_COLOR);
+
     inGame = true;
+    paused = false;
     return 0;
 }
 
@@ -84,31 +109,59 @@ void Game::eventHandle() {
             case SDL_QUIT:
                 inGame = false;
                 break;
+            case SDL_KEYUP:
+                if(event.key.keysym.scancode == SDL_SCANCODE_P) {
+                    paused = !paused;
+                }
+                break;
         };
     }
 }
 
 void Game::handle() { 
     const Uint8* kbState = SDL_GetKeyboardState(NULL);  // Captura de teclas
+    bool updateLScore = true, updateRScore = true;
+    int sideCollision;
     while(inGame) {
         eventHandle();
         
-        SDL_PumpEvents();   // Atualização da captura de teclas
+        if(!paused) {
+            SDL_PumpEvents();   // Atualização da captura de teclas
+            if(kbState[SDL_SCANCODE_W]) padL->move(true);   // Teclas jogador 1
+            else if(kbState[SDL_SCANCODE_S]) padL->move(false);
+            if(kbState[SDL_SCANCODE_UP]) padR->move(true);  // Teclas jogador 2
+            else if(kbState[SDL_SCANCODE_DOWN]) padR->move(false);
+        
+            sideCollision = ball->move(padL, padR);
+            if(sideCollision == 1) {
+                updateLScore = true;
+                scoreL++;
+            } else if(sideCollision == 2) {
+                updateRScore = true;
+                scoreR++;
+            }
 
-        if(kbState[SDL_SCANCODE_W]) padL->move(true);   // Teclas jogador 1
-        else if(kbState[SDL_SCANCODE_S]) padL->move(false);
-        if(kbState[SDL_SCANCODE_UP]) padR->move(true);  // Teclas jogador 2
-        else if(kbState[SDL_SCANCODE_DOWN]) padR->move(false);
+            if(updateLScore) {
+                scoreLabelL->setText(std::to_string(scoreL));
+                scoreLabelL->setPosition((win_w / 2) + H_SCORE_PADDING, V_SCORE_PADDING);
+                updateLScore = !updateLScore;
+            }
+            if(updateRScore) {
+                scoreLabelR->setText(std::to_string(scoreR));
+                scoreLabelR->setPosition((win_w / 2) - H_SCORE_PADDING - scoreLabelL->getRect().w, V_SCORE_PADDING);
+                updateRScore = !updateRScore;
+            }
 
-        ball->move(padL, padR);
-
-        drawScene();
-        renderScene();
+            drawScene();
+            renderScene();
+        }
     }
 }
 
 void Game::drawScene() {
     SDL_RenderCopy(renderer, background, NULL, NULL);
+    scoreLabelL->draw();
+    scoreLabelR->draw();
     padL->draw();
     padR->draw();
     ball->draw();
@@ -135,7 +188,7 @@ void Game::createBackground() {
 
     int numDot = (win_h / V_DOT_H) / 2;
     int distance = (win_h - V_DOT_H) / numDot;
-    SDL_Rect dot = {.x = (win_w / 2) - (V_DOT_H / 2), .y = V_DOT_H, .w = V_DOT_W, .h = V_DOT_H};
+    SDL_Rect dot = {.x = (win_w / 2) - (V_DOT_W / 2), .y = V_DOT_H, .w = V_DOT_W, .h = V_DOT_H};
     for(int i = 0; i < numDot && dot.y < win_h; i++) {
         SDL_RenderFillRect(renderer, &dot);
         dot.y += distance;
