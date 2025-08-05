@@ -1,6 +1,5 @@
 #include <Objects/Ball.h>
-
-bool isInsideRect(float point_x, float point_y, SDL_Rect* rect);  // Função auxiliar
+#include <iostream>
 
 Ball::Ball(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
     Object(renderer, activeArea, rect, color), gen(std::random_device{}()) {
@@ -21,12 +20,14 @@ void Ball::randomPos() {
 
 int Ball::move(Pad* padL, Pad* padR) {
     int outherReturn;
+
+    rect.x += speedX;
+    rect.y += speedY;
+
     if((outherReturn = collisionWall()) != 0) return outherReturn; 
     colisionPad(padL);
     colisionPad(padR);
 
-    rect.x += speedX;
-    rect.y += speedY;
     return 0;
 }
 
@@ -56,37 +57,17 @@ int Ball::collisionWall() {
     return 0;
 }
 
-// Colisão em relação ao Pad
 void Ball::colisionPad(Pad* pad) {
     SDL_Rect rect2 = pad->getRect();
-    if(
-        isInsideRect((rect.x + rect.w), rect.y, &rect2)  // Ponto 2
-        && isInsideRect((rect.x + rect.w), (rect.y + rect.w), &rect2)  // Ponto 4
-    ) { // Colisão na lateral esquerda
-        rect.x = rect2.x - rect2.w;
-        speedX *= -1;
-    } else if(
-        isInsideRect(rect.x, rect.y, &rect2)  // Ponto 1
-        && isInsideRect(rect.x, (rect.y + rect.h), &rect2)  // Ponto 3
-    ) { // Colisão na lateral direita
-        rect.x = rect2.x + rect2.w;
-        speedX *= -1;
-    } else if (
-        isInsideRect(rect.x, (rect.y + rect.h), &rect2)  // Ponto 3
-        || isInsideRect((rect.x + rect.w), (rect.y + rect.w), &rect2)  // Ponto 4
-    ) { // Colisão na parte superior
-        rect.y = rect2.y - rect.h;
-        speedY *= -1;
-    } else if (
-        isInsideRect(rect.x, rect.y, &rect2)  // Ponto 1
-        || isInsideRect((rect.x + rect.w), rect.y, &rect2)  // Ponto 2
-    ) { // Colisão na parte inferiror
-        rect.y = rect2.y + rect2.h;
-        speedY *= -1;
+    if(SDL_HasIntersection(&rect, &rect2)) {
+        int deltaX = (rect.x + rect.w / 2) - (rect2.x + rect2.w / 2);   // Ball.Center.X - Pad.Center.X
+        int deltaY = (rect.y + rect.h / 2) - (rect2.y + rect2.h / 2);   // Ball.Center.Y - Pad.Center.Y
+        if (((rect.w + rect2.w) / 2 - abs(deltaX)) < ((rect.h + rect2.h) / 2 - abs(deltaY))) { // intersectX < intersectY -> Lateral
+            rect.x = deltaX > 0 ? rect2.x + rect2.w : rect2.x - rect.w; 
+            speedX *= -1;
+        } else { // Superior ou Inferior
+            rect.y = deltaY > 0 ? rect2.y + rect2.h : rect2.y - rect.h; 
+            speedY *= -1; 
+        }
     }
-}
-
-bool isInsideRect(float point_x, float point_y, SDL_Rect* rect) {
-    return (point_x > rect->x && point_x < (rect->x + rect->w)) 
-        && (point_y > rect->y && point_y < (rect->y + rect->h));
 }

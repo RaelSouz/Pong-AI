@@ -3,16 +3,16 @@
 #define BACKGROUND_COLOR 25, 25, 25, 25
 #define PAD_WIDTH 15
 #define PAD_HEIGHT 100
-#define PAD_SPEED 6
+#define PAD_SPEED 7
 #define PAD_COLOR 255, 255, 255, 255
 #define BALL_SIZE 12
-#define BALL_SPEED 5
+#define BALL_SPEED 6
 #define BALL_COLOR 200, 200, 200, 255
 #define V_BORDER_H 15
 #define V_DOT_H 30
 #define V_DOT_W 15
 #define V_BORDER_COLOR 170, 170, 170, 255
-#define H_PADDING 60
+#define H_PADDING 20
 #define FONT_PATH "assets/fonts/Press_Start_2P/PressStart2P-Regular.ttf"
 #define FONT_SCORE_SIZE 40
 #define FONT_SCORE_COLOR 170, 170, 170, 255
@@ -145,12 +145,14 @@ void Game::eventHandle() {
 void Game::handle() { 
     const Uint8* kbState = SDL_GetKeyboardState(NULL);  // Captura de teclas
     int sideCollision;
-    while(gameState == GameState::onMainScene) {
-        eventHandle();
-        SDL_RenderCopy(renderer, mainScene, NULL, NULL);
-        renderScene();
-    }
 
+    // Tela inicial
+    SDL_RenderCopy(renderer, mainScene, NULL, NULL);
+    renderScene();
+    while(gameState == GameState::onMainScene) {
+        eventHandle();   
+    }
+  
     while(gameState != GameState::onQuit) {
         eventHandle();
         
@@ -159,14 +161,14 @@ void Game::handle() {
             if(kbState[SDL_SCANCODE_W]) padL->move(true);   // Teclas jogador 1
             else if(kbState[SDL_SCANCODE_S]) padL->move(false);
             if(kbState[SDL_SCANCODE_UP]) padR->move(true);  // Teclas jogador 2
-            else if(kbState[SDL_SCANCODE_DOWN]) padR->move(false);
-        
+            else if(kbState[SDL_SCANCODE_DOWN]) padR->move(false);  
+            
             sideCollision = ball->move(padL, padR);
             if(sideCollision == 1) {
                 updateScore(SCORE_LEFT);
             } else if(sideCollision == 2) {
                 updateScore(SCORE_RIGHT);
-            }        
+            }  
 
             drawScene();
             renderScene();
