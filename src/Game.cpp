@@ -24,6 +24,7 @@
 #define FONT_MAIN_PRESS_KEY_COLOR 200, 200, 200, 255
 #define V_SCORE_PADDING 60
 #define H_SCORE_PADDING 60
+#define AI_LEARN_RATE 0.1
 
 #define SCORE_LEFT true
 #define SCORE_RIGHT false
@@ -36,6 +37,7 @@ Game::Game(int width, int height, int frameRate) {
     window = nullptr, renderer = nullptr, background = nullptr;
     padL = nullptr, padR = nullptr, ball = nullptr;
     scoreFont = nullptr, scoreLabelL = nullptr, scoreLabelR = nullptr;
+    activeArea = {.x = 0, .y = V_BORDER_H, .w = win_w, .h = win_h - (2 * V_BORDER_H)};
 }
 
 Game::~Game() {
@@ -84,7 +86,6 @@ int Game::init() {
 
     // Definições Iniciais
     const int INITIAL_HEIGHT = (win_h / 2) - (PAD_HEIGHT / 2);
-    const SDL_Rect activeArea = {.x = 0, .y = V_BORDER_H, .w = win_w, .h = win_h - (2 * V_BORDER_H)};
     padL = new Pad(
         renderer, activeArea,
         {.x = H_PADDING, .y = INITIAL_HEIGHT, .w = PAD_WIDTH, .h = PAD_HEIGHT}, {PAD_COLOR}
@@ -145,6 +146,8 @@ void Game::eventHandle() {
 void Game::handle() { 
     const Uint8* kbState = SDL_GetKeyboardState(NULL);  // Captura de teclas
     int sideCollision;
+    vec input(3);
+    double out;
 
     // Tela inicial
     SDL_RenderCopy(renderer, mainScene, NULL, NULL);
@@ -158,17 +161,28 @@ void Game::handle() {
         
         if(gameState == GameState::onGame) {
             SDL_PumpEvents();   // Atualização da captura de teclas
-            if(kbState[SDL_SCANCODE_W]) padL->move(true);   // Teclas jogador 1
+            // Jogador
+            if(kbState[SDL_SCANCODE_W]) padL->move(true);
             else if(kbState[SDL_SCANCODE_S]) padL->move(false);
-            if(kbState[SDL_SCANCODE_UP]) padR->move(true);  // Teclas jogador 2
-            else if(kbState[SDL_SCANCODE_DOWN]) padR->move(false);  
+        
+            // AI
+            input[0] = nnet::normalizeTanh(ball->getRect().x + (ball->getRect().w/ 2), 0, win_w);   // BallCenterX
+            input[1] = nnet::normalizeTanh(ball->getRect().y + (ball->getRect().h / 2), 0, win_h);  // BallCenterY
+            input[2] = nnet::normalizeTanh(padR->getRect().y + (padR->getRect().h / 2), 0, win_h);  // PadCenterY
+            out = net.feedFoward(input);
+            if(out > 0.01) padR->move(true);    // Move Up
+            else if(out < -0.01) padR->move(false); // Move Down
             
+            // Scores
             sideCollision = ball->move(padL, padR);
             if(sideCollision == 1) {
-                updateScore(SCORE_LEFT);
-            } else if(sideCollision == 2) {
+                scoreR++;
                 updateScore(SCORE_RIGHT);
-            }  
+            } else if(sideCollision == 2) {
+                scoreL++;
+                updateScore(SCORE_LEFT);
+                net.backPropagation(((input[1] < input[2] ) ? 1 : -1), AI_LEARN_RATE);    // Target = BallCenterY < PadCenterY ? 1 : -1;
+            }
 
             drawScene();
             renderScene();
@@ -241,13 +255,11 @@ void Game::createBackground() {
 
 void Game::updateScore(bool isLeft) {
     if(isLeft) {
-        scoreL++;
         scoreLabelL->setText(std::to_string(scoreL));
-        scoreLabelL->setPosition((win_w / 2) + H_SCORE_PADDING, V_SCORE_PADDING);
+        scoreLabelL->setPosition((win_w / 2) - H_SCORE_PADDING - scoreLabelL->getRect().w, V_SCORE_PADDING);
     }
     else {
-        scoreR++;
         scoreLabelR->setText(std::to_string(scoreR));
-        scoreLabelR->setPosition((win_w / 2) - H_SCORE_PADDING - scoreLabelL->getRect().w, V_SCORE_PADDING);
+        scoreLabelR->setPosition((win_w / 2) + H_SCORE_PADDING, V_SCORE_PADDING);
     }
 }

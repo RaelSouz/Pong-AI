@@ -7,6 +7,7 @@
 #include <Objects/Pad.h>
 #include <Objects/Ball.h>
 #include <Ui/Label.h>
+#include <NeuralNetwork/NNet.h>
 
 enum class GameState {
     onMainScene,
@@ -22,6 +23,7 @@ class Game {
         SDL_Texture* background;
         SDL_Texture* mainScene;
         SDL_Event event;
+        SDL_Rect activeArea;
 
         int win_w, win_h;
         int scoreL, scoreR;
@@ -33,6 +35,7 @@ class Game {
         Font* scoreFont;
         Label* scoreLabelL;
         Label* scoreLabelR;
+        NNet net;
         
 
         void quit();
