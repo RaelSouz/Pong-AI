@@ -4,7 +4,7 @@
 
 class Object {
     public:
-        Object(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
+        Object(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
         virtual ~Object();
 
         void setRect(int w, int h, int x, int y);
@@ -14,7 +14,7 @@ class Object {
         void setSpeed(int speed);
         int getSpeed();
         void setPos(int x, int y);
-        void draw();
+        void draw(SDL_Renderer* renderer);
 
     protected:
         SDL_Rect rect, activeArea;

@@ -6,7 +6,7 @@
 
 class Ball : public Object {
     public:
-        Ball(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
+        Ball(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
         ~Ball();
 
 

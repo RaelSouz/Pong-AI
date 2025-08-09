@@ -12,18 +12,17 @@ struct Font {
 
 class Label {
     public:
-        Label(SDL_Renderer* renderer, Font* font, SDL_Color color);
+        Label(Font* font, SDL_Color color);
         ~Label();
 
         void setFont(Font* font, SDL_Color color);
-        int setText(std::string  text);
+        int setText(SDL_Renderer* renderer, std::string  text);
         void setPosition(int posX, int posY);
         SDL_Rect getRect();
-        void draw();
+        void draw(SDL_Renderer* renderer);
 
     private:
         Font* font;
-        SDL_Renderer* ptrRenderer;
         SDL_Texture* texture;
         SDL_Rect rect;
         SDL_Color color;

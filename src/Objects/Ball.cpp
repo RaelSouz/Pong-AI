@@ -1,15 +1,13 @@
 #include <Objects/Ball.h>
 #include <iostream>
 
-Ball::Ball(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
-    Object(renderer, activeArea, rect, color), gen(std::random_device{}()) {
+Ball::Ball(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+    Object(activeArea, rect, color), gen(std::random_device{}()) {
     dist = std::uniform_int_distribution<int>(activeArea.h * 0.1, activeArea.h * 0.9);
     randomPos();
 }
 
-Ball::~Ball() {
-    ptrRenderer = nullptr;
-}
+Ball::~Ball() {}
 
 void Ball::randomPos() {
     rect.y = dist(gen);

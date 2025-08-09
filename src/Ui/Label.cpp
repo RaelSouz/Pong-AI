@@ -1,15 +1,13 @@
 #include <Ui/Label.h>
 
-Label::Label(SDL_Renderer* renderer, Font* font, SDL_Color color) {
-    ptrRenderer = &(*renderer);
-    texture = nullptr;
+Label::Label(Font* font, SDL_Color color) :
+    texture(nullptr), color(color), rect({0}) {
     setFont(font, color);
 }
 
 Label::~Label() {
-    ptrRenderer = nullptr;
-    SDL_DestroyTexture(texture);
-    font = nullptr;
+    if(texture) SDL_DestroyTexture(texture);
+    if(font) font = nullptr;
 }
 
 void Label::setFont(Font* font, SDL_Color color) {
@@ -17,19 +15,17 @@ void Label::setFont(Font* font, SDL_Color color) {
     this->color = color;
 }
 
-int Label::setText(std::string  text) {
-    SDL_Surface* surface = TTF_RenderText_Blended(font->src, text.c_str(), color);
-
-	SDL_DestroyTexture(texture);
-	texture = SDL_CreateTextureFromSurface(ptrRenderer, surface);
-	if (texture == NULL) {
-        std::cerr << "setText: CreateTextureFromSurface error " << SDL_GetError() << std::endl;
-		return 1;
-	}
+int Label::setText(SDL_Renderer* renderer, std::string  text) {
+    SDL_Surface* surface;
+    if(!(surface = TTF_RenderUTF8_Blended(font->src, text.c_str(), color))) return -1;
+    if(texture) SDL_DestroyTexture(texture);
+	if(!(texture = SDL_CreateTextureFromSurface(renderer, surface))) {
+        SDL_FreeSurface(surface);
+		return -1;
+    }
 	rect.w = surface->w;
 	rect.h = surface->h;
     SDL_FreeSurface(surface);
-    
     return 0;
 }
 
@@ -41,25 +37,17 @@ SDL_Rect Label::getRect() {
     return rect;
 }
 
-void Label::draw() {
-    SDL_RenderCopy(ptrRenderer, texture, NULL, &rect);
+void Label::draw(SDL_Renderer* renderer) {
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
 
 int utils::initFonts() {
-    if(TTF_Init() == -1) {
-        std::cerr << "TTF_Init Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    return 0;
+    return TTF_Init();
 }
 
 Font* utils::openFont(std::string path, float size) {
 	Font* font = new Font;
-    font->src = TTF_OpenFont(path.c_str(), size);
-	if (font->src == NULL) {
-        std::cerr << "TTF_OpenFont Error: " << SDL_GetError() << std::endl;
-		return NULL;
-	}
+    if(!(font->src = TTF_OpenFont(path.c_str(), size))) return NULL;
     font->size = size;
     return font;
 }

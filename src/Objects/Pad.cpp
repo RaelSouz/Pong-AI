@@ -1,11 +1,9 @@
 #include <Objects/Pad.h>
 
-Pad::Pad(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
-    Object(renderer, activeArea, rect, color) { }
+Pad::Pad(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+    Object(activeArea, rect, color) { }
 
-Pad::~Pad() { 
-    ptrRenderer = nullptr;
-}
+Pad::~Pad() {}
 
 void Pad::move(bool up) {
     rect.y += up ? (-1 * speed) : speed;

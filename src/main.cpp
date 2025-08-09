@@ -3,7 +3,8 @@
 Game game(900, 600, 60);
 
 int main() {
-    game.init();
-    game.handle();
+    if(game.init() == 0) {
+        game.handle();
+    }
     return 0;
 }

@@ -4,13 +4,14 @@
 #include <iostream>
 #include <unistd.h>
 
+#include <Config.h>
 #include <Objects/Pad.h>
 #include <Objects/Ball.h>
 #include <Ui/Label.h>
 #include <NeuralNetwork/NNet.h>
 
 enum class GameState {
-    onMainScene,
+    onInitialScene,
     onGame,
     onPaused,
     onQuit
@@ -18,12 +19,12 @@ enum class GameState {
 
 class Game {
     private:
+
         SDL_Window* window;
         SDL_Renderer* renderer;
-        SDL_Texture* background;
-        SDL_Texture* mainScene;
+        SDL_Texture* initialBackground;
+        SDL_Texture* runningBackground;
         SDL_Event event;
-        SDL_Rect activeArea;
 
         int win_w, win_h;
         int scoreL, scoreR;
@@ -33,18 +34,23 @@ class Game {
         Pad* padR;
         Ball* ball;
         Font* scoreFont;
+        Font* titleFont;
+        Font* pressKeyFont;
+        Font* infoFont;
         Label* scoreLabelL;
         Label* scoreLabelR;
+        Label* title;
+        Label* pressKey;
+        Label* infoPause;
+        Label* infoQuit;
         NNet net;
         
 
-        void quit();
         void eventHandle();
-        void drawScene();
-        void renderScene();
-        void createBackground();
-        void createMainScene();
+        int createInitialScene();
+        int createRunningScene();
         void updateScore(bool isLeft);
+        void renderScene();
 
     public:
 

@@ -1,8 +1,7 @@
 #include <Objects/Object.h>
 
-Object::Object(SDL_Renderer* renderer, SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
-    rect(rect), color(color), ptrRenderer(&(*renderer)), activeArea(activeArea) {
-}
+Object::Object(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+    rect(rect), color(color), activeArea(activeArea) {}
 
 Object::~Object() = default;
 
@@ -35,7 +34,7 @@ void Object::setPos(int x, int y) {
     rect.x = x, rect.y = y;
 }
 
-void Object::draw() {
-    SDL_SetRenderDrawColor(ptrRenderer, color.r, color.g, color.b, color.a);
-    SDL_RenderFillRect(ptrRenderer, &rect);
+void Object::draw(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(renderer, &rect);
 }

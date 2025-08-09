@@ -1,146 +1,76 @@
 #include <Game.h>
 
-#define BACKGROUND_COLOR 25, 25, 25, 25
-#define PAD_WIDTH 15
-#define PAD_HEIGHT 100
-#define PAD_SPEED 7
-#define PAD_COLOR 255, 255, 255, 255
-#define BALL_SIZE 12
-#define BALL_SPEED 6
-#define BALL_COLOR 200, 200, 200, 255
-#define V_BORDER_H 15
-#define V_DOT_H 30
-#define V_DOT_W 15
-#define V_BORDER_COLOR 170, 170, 170, 255
-#define H_PADDING 20
-#define FONT_PATH "assets/fonts/Press_Start_2P/PressStart2P-Regular.ttf"
-#define FONT_SCORE_SIZE 40
-#define FONT_SCORE_COLOR 170, 170, 170, 255
-#define FONT_MAIN_TITLE "Pong AI"
-#define FONT_MAIN_TITLE_SIZE 82
-#define FONT_MAIN_TITLE_COLOR 240, 240, 240, 255
-#define FONT_MAIN_PRESS_KEY "Pressione qualquer tecla para iniciar"
-#define FONT_MAIN_PRESS_KEY_SIZE 14
-#define FONT_MAIN_PRESS_KEY_COLOR 200, 200, 200, 255
-#define V_SCORE_PADDING 60
-#define H_SCORE_PADDING 60
-#define AI_LEARN_RATE 0.1
-
-#define SCORE_LEFT true
-#define SCORE_RIGHT false
-
-Game::Game(int width, int height, int frameRate) {
-    win_w = width, win_h = height;
-    scoreL = 0, scoreR = 0;
-    frameDelay = 1000 / frameRate;
-    gameState = GameState::onMainScene;
-    window = nullptr, renderer = nullptr, background = nullptr;
-    padL = nullptr, padR = nullptr, ball = nullptr;
-    scoreFont = nullptr, scoreLabelL = nullptr, scoreLabelR = nullptr;
-    activeArea = {.x = 0, .y = V_BORDER_H, .w = win_w, .h = win_h - (2 * V_BORDER_H)};
-}
+Game::Game(int width, int height, int frameRate) :
+    win_w(width), win_h(height), scoreL(0), scoreR(0),
+    frameDelay(1000 / frameRate), gameState(GameState::onInitialScene),
+    window(nullptr), renderer(nullptr), initialBackground(nullptr), runningBackground(nullptr),
+    event(), padL(nullptr), padR(nullptr), ball(nullptr),
+    scoreFont(nullptr), titleFont(nullptr), pressKeyFont(nullptr), infoFont(nullptr),
+    scoreLabelL(nullptr), scoreLabelR(nullptr), title(nullptr), pressKey(nullptr), infoPause(nullptr), infoQuit(nullptr),
+    net()
+{}
 
 Game::~Game() {
-    delete padL;
-    delete padR;
-    delete ball;
-    delete scoreLabelL;
-    delete scoreLabelR;
-}
-
-int Game::init() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) { // Inicializando o SDL
-        std::cerr << "Erro ao inicializar o SDL: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    if((window = SDL_CreateWindow(  // Inicialização da Janela
-        "Pong AI", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, 0
-    )) == NULL) { 
-        std::cerr << "Erro ao inicializar a janela: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    if((renderer = SDL_CreateRenderer(window, -1, 0)) == NULL) { // Inicializando o renderer
-        std::cerr << "Erro ao inicializar o renderer: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    if((background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, win_w, win_h)) == NULL) { // Inicializando o background
-        std::cerr << "Erro ao inicializar a textura do background: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    if(utils::initFonts() == 1) { // Criação do renderer
-        std::cerr << "Erro ao inicializar as fonts: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    chdir("..");    // Retorna para o diretório do game
-    if((scoreFont = utils::openFont(FONT_PATH, FONT_SCORE_SIZE)) == NULL) { // Criação do renderer
-        std::cerr << "Erro ao abrir a fonte: " << FONT_PATH << " " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    createMainScene();
-    createBackground();
-
-    // Definições Iniciais
-    const int INITIAL_HEIGHT = (win_h / 2) - (PAD_HEIGHT / 2);
-    padL = new Pad(
-        renderer, activeArea,
-        {.x = H_PADDING, .y = INITIAL_HEIGHT, .w = PAD_WIDTH, .h = PAD_HEIGHT}, {PAD_COLOR}
-    );
-    padL->setSpeed(PAD_SPEED);
-    padR = new Pad(
-        renderer, activeArea, 
-        {.x = win_w - H_PADDING - PAD_WIDTH, .y = INITIAL_HEIGHT, .w = PAD_WIDTH, .h = PAD_HEIGHT}, {PAD_COLOR}
-    );
-    padR->setSpeed(PAD_SPEED);
-
-    ball = new Ball(
-        renderer, activeArea,
-        {.w = BALL_SIZE, .h = BALL_SIZE}, {BALL_COLOR}
-    );
-    ball->setSpeed(BALL_SPEED);
-
-    scoreLabelL = new Label(renderer, scoreFont, {FONT_SCORE_COLOR});
-    updateScore(SCORE_LEFT);
-    scoreLabelR = new Label(renderer, scoreFont, {FONT_SCORE_COLOR});
-    updateScore(SCORE_RIGHT);
-
-    return 0;
-}
-
-void Game::quit() {
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyTexture(background);
-    SDL_DestroyTexture(mainScene);
-    utils::closeFont(scoreFont);
+    if(padL) delete padL;
+    if(padR) delete padR;
+    if(ball) delete ball;
+    if(scoreLabelL) delete scoreLabelL;
+    if(scoreLabelR) delete scoreLabelR;
+    if(title) delete title;
+    if(pressKey) delete pressKey;
+    if(infoPause) delete infoPause;
+    if(infoQuit) delete infoQuit;
+    if(window) SDL_DestroyWindow(window);
+    if(renderer) SDL_DestroyRenderer(renderer);
+    if(initialBackground) SDL_DestroyTexture(initialBackground);
+    if(runningBackground) SDL_DestroyTexture(runningBackground);
+    if(scoreFont) utils::closeFont(scoreFont);
+    if(titleFont) utils::closeFont(titleFont);
+    if(pressKeyFont) utils::closeFont(pressKeyFont);
+    if(infoFont) utils::closeFont(infoFont);
     SDL_Quit();
 }
 
-void Game::eventHandle() {
-    while(SDL_PollEvent(&event)) {
-        switch(event.type) {
-            case SDL_QUIT:
-                gameState = GameState::onQuit;
-                break;
-            case SDL_KEYUP:
-                if(event.key.keysym.scancode == SDL_SCANCODE_Q) {   // Pressione Q para sair
-                    gameState = GameState::onQuit;
-                } else if(gameState == GameState::onMainScene) { // Pressione qualquer tecla para iniciar
-                    gameState = GameState::onGame;  
-                } else if(event.key.keysym.scancode == SDL_SCANCODE_P) {  // Pressione P para pausar
-                    if(gameState == GameState::onGame) {
-                        gameState = GameState::onPaused;
-                    } else if (gameState == GameState::onPaused) {
-                        gameState = GameState::onGame;
-                    }
-                }
-                break;
-        };
+int Game::init() {
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+        std::cerr << "Erro ao inicializar o SDL: " << SDL_GetError() << std::endl;
+        return -1;
     }
+
+    if((window = SDL_CreateWindow(
+        "Pong AI", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, 0
+    )) == NULL) { 
+        std::cerr << "Erro na criação da janela: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    if((renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) == NULL) {
+        std::cerr << "Erro na criação do renderer: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    if(utils::initFonts() < 0) {
+        std::cerr << "Erro ao inicializar as fontes: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    chdir("..");    // Retorna para o diretório do game
+    if((scoreFont = utils::openFont(FONT_PATH, FONT_SCORE_SIZE)) == NULL) {
+        std::cerr << "Erro ao abrir a fonte(PATH): " << FONT_PATH << " " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    if(createInitialScene() < 0) { 
+        std::cerr << "Erro na criação da tela inicial: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    if(createRunningScene() < 0) {
+        std::cerr << "Erro na criação da tela de execução: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    return 0;
 }
 
 void Game::handle() { 
@@ -148,18 +78,35 @@ void Game::handle() {
     int sideCollision;
     vec input(3);
     double out;
+    Uint32 currentTime, lastToggleTime = 0;
+    bool showText = false;
 
-    // Tela inicial
-    SDL_RenderCopy(renderer, mainScene, NULL, NULL);
-    renderScene();
-    while(gameState == GameState::onMainScene) {
-        eventHandle();   
+    while(gameState == GameState::onInitialScene) {
+        eventHandle();
+        currentTime = SDL_GetTicks64();
+        if(currentTime - lastToggleTime >= INITIAL_ANIM_TIME) {
+            showText = !showText;
+            lastToggleTime = currentTime;
+        }
+        SDL_RenderCopy(renderer, initialBackground, NULL, NULL);
+        if(showText) pressKey->draw(renderer);
+        renderScene();
     }
   
     while(gameState != GameState::onQuit) {
         eventHandle();
         
         if(gameState == GameState::onGame) {
+            sideCollision = ball->move(padL, padR);
+            if(sideCollision == 1) {
+                scoreR++;
+                updateScore(SCORE_RIGHT);
+            } else if(sideCollision == 2) {
+                scoreL++;
+                updateScore(SCORE_LEFT);
+                net.backPropagation(((input[1] < input[2] ) ? 1 : -1), AI_LEARN_RATE);    // Target = BallCenterY < PadCenterY ? 1 : -1;
+            }
+
             SDL_PumpEvents();   // Atualização da captura de teclas
             // Jogador
             if(kbState[SDL_SCANCODE_W]) padL->move(true);
@@ -172,66 +119,77 @@ void Game::handle() {
             out = net.feedFoward(input);
             if(out > 0.01) padR->move(true);    // Move Up
             else if(out < -0.01) padR->move(false); // Move Down
-            
-            // Scores
-            sideCollision = ball->move(padL, padR);
-            if(sideCollision == 1) {
-                scoreR++;
-                updateScore(SCORE_RIGHT);
-            } else if(sideCollision == 2) {
-                scoreL++;
-                updateScore(SCORE_LEFT);
-                net.backPropagation(((input[1] < input[2] ) ? 1 : -1), AI_LEARN_RATE);    // Target = BallCenterY < PadCenterY ? 1 : -1;
-            }
-
-            drawScene();
+    
+            SDL_RenderCopy(renderer, runningBackground, NULL, NULL);
+            scoreLabelL->draw(renderer);
+            scoreLabelR->draw(renderer);
+            ball->draw(renderer);
+            padL->draw(renderer);
+            padR->draw(renderer);
             renderScene();
         }
     }
-    quit();
 }
 
-void Game::drawScene() {
-    SDL_RenderCopy(renderer, background, NULL, NULL);
-    scoreLabelL->draw();
-    scoreLabelR->draw();
-    padL->draw();
-    padR->draw();
-    ball->draw();
+void Game::eventHandle() {
+    while(SDL_PollEvent(&event)) {
+        switch(event.type) {
+            case SDL_QUIT:
+                gameState = GameState::onQuit;
+                break;
+            case SDL_KEYUP:
+                if(event.key.keysym.scancode == SDL_SCANCODE_Q) {   // (Q) para sair
+                    gameState = GameState::onQuit;
+                } else if(gameState == GameState::onInitialScene && event.key.keysym.scancode == SDL_SCANCODE_SPACE) { // (Espaço) para iniciar
+                    gameState = GameState::onGame;  
+                } else if(event.key.keysym.scancode == SDL_SCANCODE_P) {  // (P) para pausar
+                    if(gameState == GameState::onGame) {
+                        gameState = GameState::onPaused;
+                    } else if (gameState == GameState::onPaused) {
+                        gameState = GameState::onGame;
+                    }
+                }
+                break;
+        };
+    }
 }
 
-void Game::renderScene() {
-    SDL_UpdateWindowSurface(window);
-    SDL_RenderPresent(renderer);
-    SDL_Delay(frameDelay);
-}
+int Game::createInitialScene() {
+    if((initialBackground = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, win_w, win_h)) == NULL) return -1;
+    if((titleFont = utils::openFont(FONT_PATH, FONT_INITIAL_TITLE_SIZE)) == NULL) return -1;
+    if((pressKeyFont = utils::openFont(FONT_PATH, FONT_INITIAL_PRESS_KEY_SIZE)) == NULL) return -1;
+    if((infoFont = utils::openFont(FONT_PATH, FONT_INITIAL_INFO_SIZE)) == NULL) return -1;
 
-void Game::createMainScene() {
-    SDL_Texture* renderTargetOriginal = SDL_GetRenderTarget(renderer);
-    SDL_SetRenderTarget(renderer, mainScene);
-
-    Font* titleFont = utils::openFont(FONT_PATH, FONT_MAIN_TITLE_SIZE);
-    Font* pressKeyFont = utils::openFont(FONT_PATH, FONT_MAIN_PRESS_KEY_SIZE);
-    Label* title = new Label(renderer, titleFont, {FONT_MAIN_TITLE_COLOR});
-    Label* pressKey = new Label(renderer, pressKeyFont, {FONT_MAIN_PRESS_KEY_COLOR});
+    SDL_SetRenderTarget(renderer, initialBackground);
+    title = new Label(titleFont, {FONT_INITIAL_TITLE_COLOR});
+    infoPause = new Label(infoFont, {FONT_INITIAL_INFO_COLOR});
+    infoQuit = new Label(infoFont, {FONT_INITIAL_INFO_COLOR});
     
     SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
     SDL_RenderClear(renderer);
-    title->setText(FONT_MAIN_TITLE);
-    pressKey->setText(FONT_MAIN_PRESS_KEY);
-    title->setPosition((win_w / 2) - (title->getRect().w / 2), 180);
-    pressKey->setPosition((win_w / 2) - (pressKey->getRect().w / 2), 360);
-    title->draw();
-    pressKey->draw();
 
-    SDL_SetRenderTarget(renderer, renderTargetOriginal);
-    utils::closeFont(titleFont);
-    utils::closeFont(pressKeyFont);
+    if(title->setText(renderer, FONT_INITIAL_TITLE) < 0) return -1;
+    if(infoPause->setText(renderer, FONT_INITIAL_INFO_P) < 0) return -1;
+    if(infoQuit->setText(renderer, FONT_INITIAL_INFO_Q) < 0) return -1;
+
+    title->setPosition((win_w / 2) - (title->getRect().w / 2), FONT_INITIAL_TITLE_PADDING);
+    infoQuit->setPosition(FONT_INITIAL_INFO_PADDING, win_h - infoQuit->getRect().h - FONT_INITIAL_INFO_PADDING);
+    infoPause->setPosition(FONT_INITIAL_INFO_PADDING, infoQuit->getRect().y - FONT_INITIAL_INFO_PADDING - infoPause->getRect().h);
+
+    title->draw(renderer);
+    infoPause->draw(renderer);
+    infoQuit->draw(renderer);
+    SDL_SetRenderTarget(renderer, NULL);
+
+    pressKey = new Label(pressKeyFont, {FONT_INITIAL_PRESS_KEY_COLOR});
+    if(pressKey->setText(renderer, FONT_INITIAL_PRESS_KEY) < 0) return -1;
+    pressKey->setPosition((win_w / 2) - (pressKey->getRect().w / 2), FONT_INITIAL_PRESS_KEY_PADDING);
+    return 0;
 }
 
-void Game::createBackground() {
-    SDL_Texture* renderTargetOriginal = SDL_GetRenderTarget(renderer);
-    SDL_SetRenderTarget(renderer, background);
+int Game::createRunningScene() {
+    if((runningBackground = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, win_w, win_h)) == NULL) return -1;
+    SDL_SetRenderTarget(renderer, runningBackground);
 
     SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
     SDL_RenderClear(renderer);
@@ -250,16 +208,46 @@ void Game::createBackground() {
         dot.y += distance;
     }
 
-    SDL_SetRenderTarget(renderer, renderTargetOriginal);
+    SDL_SetRenderTarget(renderer, NULL);
+
+    const int INITIAL_HEIGHT = (win_h / 2) - (PAD_HEIGHT / 2);
+    const SDL_Rect ACTIVE_AREA{.x = 0, .y = V_BORDER_H, .w = win_w, .h = win_h - (2 * V_BORDER_H)};
+    padL = new Pad(
+        ACTIVE_AREA,
+        {.x = H_PADDING, .y = INITIAL_HEIGHT, .w = PAD_WIDTH, .h = PAD_HEIGHT}, {PAD_COLOR}
+    );
+    padL->setSpeed(PAD_SPEED);
+    padR = new Pad(
+        ACTIVE_AREA, 
+        {.x = win_w - H_PADDING - PAD_WIDTH, .y = INITIAL_HEIGHT, .w = PAD_WIDTH, .h = PAD_HEIGHT}, {PAD_COLOR}
+    );
+    padR->setSpeed(PAD_SPEED);
+
+    ball = new Ball(
+        ACTIVE_AREA,
+        {.w = BALL_SIZE, .h = BALL_SIZE}, {BALL_COLOR}
+    );
+    ball->setSpeed(BALL_SPEED);
+
+    scoreLabelL = new Label(scoreFont, {FONT_SCORE_COLOR});
+    scoreLabelR = new Label(scoreFont, {FONT_SCORE_COLOR});
+    updateScore(SCORE_LEFT);
+    updateScore(SCORE_RIGHT);
+    return 0;
 }
 
 void Game::updateScore(bool isLeft) {
     if(isLeft) {
-        scoreLabelL->setText(std::to_string(scoreL));
+        scoreLabelL->setText(renderer, std::to_string(scoreL));
         scoreLabelL->setPosition((win_w / 2) - H_SCORE_PADDING - scoreLabelL->getRect().w, V_SCORE_PADDING);
     }
     else {
-        scoreLabelR->setText(std::to_string(scoreR));
+        scoreLabelR->setText(renderer, std::to_string(scoreR));
         scoreLabelR->setPosition((win_w / 2) + H_SCORE_PADDING, V_SCORE_PADDING);
     }
+}
+
+void Game::renderScene() {
+    SDL_RenderPresent(renderer);
+    SDL_Delay(frameDelay);
 }
