@@ -14,6 +14,7 @@ enum class GameState {
     onInitialScene,
     onGame,
     onPaused,
+    onEnd,
     onQuit
 };
 
@@ -24,6 +25,7 @@ class Game {
         SDL_Renderer* renderer;
         SDL_Texture* initialBackground;
         SDL_Texture* runningBackground;
+        SDL_Texture* endBackground;
         SDL_Event event;
 
         int win_w, win_h;
@@ -37,19 +39,26 @@ class Game {
         Font* titleFont;
         Font* pressKeyFont;
         Font* infoFont;
+        Font* victoryFont;
         Label* scoreLabelL;
         Label* scoreLabelR;
         Label* title;
+        Label* victoryTitle;
         Label* pressKey;
+        Label* infoRetry;
+        Label* infoRestartSame;
+        Label* infoRestartNew;
         Label* infoPause;
         Label* infoQuit;
-        NNet net;
+        NNet* net;
         
 
         void eventHandle();
         int createInitialScene();
         int createRunningScene();
-        void updateScore(bool isLeft);
+        int createEndScene();
+        int updateScore(bool isLeft);
+        void onRestart(bool isSame);
         void renderScene();
 
     public:
@@ -58,5 +67,5 @@ class Game {
         ~Game();
 
         int init();
-        void handle();
+        int handle();
 };

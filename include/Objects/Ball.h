@@ -12,13 +12,13 @@ class Ball : public Object {
 
         int move(Pad* padL, Pad* padR);
         void setSpeed(int speed);
+        void randomPos();
 
     private:
         std::mt19937 gen;
         std::uniform_int_distribution<int> dist;
         int speedX, speedY;
 
-        void randomPos();
         int collisionWall();
         void colisionPad(Pad* pad);
 };

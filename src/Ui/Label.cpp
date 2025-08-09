@@ -17,7 +17,7 @@ void Label::setFont(Font* font, SDL_Color color) {
 
 int Label::setText(SDL_Renderer* renderer, std::string  text) {
     SDL_Surface* surface;
-    if(!(surface = TTF_RenderUTF8_Blended(font->src, text.c_str(), color))) return -1;
+    if(!(surface = TTF_RenderUTF8_Solid(font->src, text.c_str(), color))) return -1;
     if(texture) SDL_DestroyTexture(texture);
 	if(!(texture = SDL_CreateTextureFromSurface(renderer, surface))) {
         SDL_FreeSurface(surface);

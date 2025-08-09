@@ -3,6 +3,7 @@
 #define FONT_PATH "assets/fonts/Press_Start_2P/PressStart2P-Regular.ttf"
 #define AI_LEARN_RATE 0.1
 #define INITIAL_ANIM_TIME 1000
+#define POINTS_WIN_CONDICION 2
 #define BALL_SPEED 6
 #define PAD_SPEED 7
 #define PAD_WIDTH 15
@@ -11,30 +12,36 @@
 #define V_BORDER_H 15
 #define V_DOT_H 30
 #define V_DOT_W 15
+#define PAD_INITIAL_HEIGHT 60
 #define H_PADDING 20
 #define V_SCORE_PADDING 60
 #define H_SCORE_PADDING 60
 #define FONT_SCORE_SIZE 40
-#define FONT_INITIAL_TITLE_SIZE 82
-#define FONT_INITIAL_PRESS_KEY_SIZE 14
-#define FONT_INITIAL_INFO_SIZE 12
-#define FONT_INITIAL_TITLE_PADDING 140
-#define FONT_INITIAL_PRESS_KEY_PADDING 360
-#define FONT_INITIAL_INFO_PADDING 20
+#define FONT_TITLE_SIZE 82
+#define FONT_PRESS_KEY_SIZE 14
+#define FONT_INFO_SIZE 14
+#define FONT_VICTORY_SIZE 64
+#define FONT_TITLE_PADDING 140
+#define FONT_PRESS_KEY_PADDING 360
+#define FONT_INFO_PADDING 20
 
 #define BACKGROUND_COLOR 25, 25, 25, 25
 #define PAD_COLOR 255, 255, 255, 255
 #define BALL_COLOR 200, 200, 200, 255
 #define V_BORDER_COLOR 170, 170, 170, 255
 #define FONT_SCORE_COLOR 170, 170, 170, 255
-#define FONT_INITIAL_TITLE_COLOR 240, 240, 240, 255
-#define FONT_INITIAL_PRESS_KEY_COLOR 200, 200, 200, 255
-#define FONT_INITIAL_INFO_COLOR 200, 200, 200, 255
+#define FONT_TITLE_COLOR 240, 240, 240, 255
+#define FONT_PRESS_KEY_COLOR 200, 200, 200, 255
+#define FONT_INFO_COLOR 200, 200, 200, 255
 
-#define FONT_INITIAL_TITLE "Pong AI"
-#define FONT_INITIAL_PRESS_KEY "Pressione espaço para iniciar"
-#define FONT_INITIAL_INFO_Q "Q - Sair do jogo"
-#define FONT_INITIAL_INFO_P "P - Pausar o jogo"
+#define FONT_TITLE "Pong AI"
+#define FONT_PRESS_KEY "Pressione espaço para iniciar"
+#define FONT_INFO_M "M - Tentar novamente com a mesma AI"
+#define FONT_INFO_N "N - Tentar novamente uma nova AI"
+#define FONT_INFO_Q "Q - Sair do jogo"
+#define FONT_INFO_P "P - Pausar o jogo"
+#define FONT_VICTORY "Você ganhou!"
+#define FONT_LOSS "Você perdeu!"
 
 #define SCORE_LEFT true
 #define SCORE_RIGHT false
