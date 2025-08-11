@@ -132,8 +132,8 @@ int Game::handle() {
             input[1] = nnet::normalizeTanh(ball->getRect().y + (ball->getRect().h / 2), 0, win_h);  // BallCenterY
             input[2] = nnet::normalizeTanh(padR->getRect().y + (padR->getRect().h / 2), 0, win_h);  // PadCenterY
             out = net->feedFoward(input);
-            if(out > 0.01) padR->move(true);    // Move Up
-            else if(out < -0.01) padR->move(false); // Move Down
+            if(out > AI_THRESHOLD) padR->move(true);    // Move Up
+            else if(out < -AI_THRESHOLD) padR->move(false); // Move Down
     
             SDL_RenderCopy(renderer, runningBackground, NULL, NULL);
             scoreLabelL->draw(renderer);

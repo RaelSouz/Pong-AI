@@ -2,8 +2,9 @@
 
 #define FONT_PATH "assets/fonts/Press_Start_2P/PressStart2P-Regular.ttf"
 #define AI_LEARN_RATE 0.1
+#define AI_THRESHOLD 0.01
 #define INITIAL_ANIM_TIME 1000
-#define POINTS_WIN_CONDICION 2
+#define POINTS_WIN_CONDICION 24
 #define BALL_SPEED 6
 #define PAD_SPEED 7
 #define PAD_WIDTH 15
