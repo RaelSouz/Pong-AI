@@ -1,12 +1,12 @@
 #include <NeuralNetwork/vec.h>
 
-vec::vec(size_t size) : dt(size, 0.0) {}
+vec::vec(size_t size) : dt(size, 0.0f) {}
 
-vec::vec(const std::vector<double>& values) {
+vec::vec(const std::vector<float>& values) {
     dt = std::move(values);
 }
 
-vec::vec(std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end) :
+vec::vec(std::vector<float>::const_iterator begin, std::vector<float>::const_iterator end) :
     dt(begin, end)
 {}
 
@@ -21,12 +21,12 @@ vec& vec::operator=(vec&& rhs) noexcept {
     return *this;
 }
 
-double& vec::operator[](size_t index) {
+float& vec::operator[](size_t index) {
     if(index >= dt.size()) throw std::out_of_range("Index out of range");
     return dt[index];
 }
 
-const double& vec::operator[](size_t index) const {
+const float& vec::operator[](size_t index) const {
     if(index >= dt.size()) throw std::out_of_range("Index out of range");
     return dt[index];
 }
@@ -40,16 +40,16 @@ vec vec::operator*(const vec& rhs) const {
     return v;
 }
 
-double vec::sum() {
-    double s = 0;
-    for(double value : dt) s += value;
+float vec::sum() {
+    float s = 0.0f;
+    for(float value : dt) s += value;
     return s;
 }
 
-vec nnet::random::uniform(size_t size, double min, double max) {
+vec nnet::random::uniform(size_t size, float min, float max) {
     std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<double> d(min, max);
+	std::uniform_real_distribution<float> d(min, max);
 	vec v = vec(size);
 	for(int i = 0; i < v.size(); i++) {
         v[i] = d(gen);

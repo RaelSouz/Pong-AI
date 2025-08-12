@@ -9,24 +9,24 @@ class vec {
     public:
         vec(size_t size);
         vec(const vec& outra) = default;
-        vec(const std::vector<double>& values);
-        vec(std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end);
+        vec(const std::vector<float>& values);
+        vec(std::vector<float>::const_iterator begin, std::vector<float>::const_iterator end);
 
         size_t size() const;
         vec& operator=(const vec& rhs) = default;
         vec& operator=(vec&& rhs) noexcept;
-        double& operator[](size_t index);
-        const double& operator[](size_t index) const;
+        float& operator[](size_t index);
+        const float& operator[](size_t index) const;
         vec operator*(const vec& rhs) const;
-        double sum();
+        float sum();
         
 
     private:
-        std::vector<double> dt;
+        std::vector<float> dt;
 };
 
 namespace nnet {
     namespace random {
-        vec uniform(size_t size, double min, double max);
+        vec uniform(size_t size, float min, float max);
     }
 }

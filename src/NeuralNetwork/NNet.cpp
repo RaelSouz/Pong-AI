@@ -1,14 +1,14 @@
 #include <NeuralNetwork/NNet.h>
 
 NNet::NNet() : 
-    layer1(nnet::random::uniform(6, 3, -0.5, 0.5)),
-    layer2(nnet::random::uniform(6, -0.5, 0.5)),
+    layer1(nnet::random::uniform(6, 3, -0.5f, 0.5f)),
+    layer2(nnet::random::uniform(6, -0.5f, 0.5f)),
     in(3),
     outL1(6),
-    outL2(0.0)
+    outL2(0.0f)
     {}
 
-const double& NNet::feedFoward(vec& input) {
+const float& NNet::feedFoward(vec& input) {
     in = input;
     int i;
     for(i = 0; i < outL1.size(); i++) {
@@ -19,9 +19,9 @@ const double& NNet::feedFoward(vec& input) {
     return outL2;
 }
 
-void NNet::backPropagation(double target, double learnRate) {
+void NNet::backPropagation(float target, float learnRate) {
     int i, j;
-    double loss = (outL2 - target) * nnet::Tanh(outL2, true);
+    float loss = (outL2 - target) * nnet::Tanh(outL2, true);
 
     for(i = 0; i < layer2.size(); i++) {
         layer2[i] -= learnRate * loss * outL1[i];
@@ -34,10 +34,10 @@ void NNet::backPropagation(double target, double learnRate) {
     }
 }
 
-double nnet::Tanh(double x, bool derivate) {
-    return derivate ? 1.0 - x * x : tanh(x);
+float nnet::Tanh(float x, bool derivate) {
+    return derivate ? 1.0f - x * x : static_cast<float>(tanh(x));
 }
 
-double nnet::normalizeTanh(double value, double min, double max) {
+float nnet::normalizeTanh(float value, float min, float max) {
     return 2.0f * ((value - min) / (max - min)) - 1.0f;
 }

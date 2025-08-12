@@ -87,7 +87,7 @@ int Game::handle() {
     const Uint8* kbState = SDL_GetKeyboardState(NULL);  // Captura de teclas
     int sideCollision;
     vec input(3);
-    double out;
+    float out;
     Uint32 currentTime, lastToggleTime = 0;
     bool showText = false;
   
