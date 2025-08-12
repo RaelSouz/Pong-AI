@@ -1,10 +1,9 @@
 #include <Objects/Ball.h>
-#include <iostream>
 
-Ball::Ball(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+Ball::Ball(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color) :
     Object(activeArea, rect, color), gen(std::random_device{}()),
     collidedX(false), collidedY(false),
-    dist(std::uniform_int_distribution<int>(activeArea.h * 0.1, activeArea.h * 0.9)) {
+    dist(std::uniform_int_distribution<int>(activeArea.h * 0.1f, activeArea.h * 0.9f)) {
     reset();
 }
 
@@ -13,11 +12,11 @@ Ball::~Ball() {}
 void Ball::reset() {
     rect.y = dist(gen);
     rect.x = (activeArea.w / 2) - (rect.w / 2); 
-    speedX *= (dist(gen) % 2) ? -1 : 1;
-    speedY *= (dist(gen) % 2) ? -1 : 1;
+    speedX *= (dist(gen) % 2) ? -1.0f : 1.0f;
+    speedY *= (dist(gen) % 2) ? -1.0f : 1.0f;
 }
 
-int Ball::move(SDL_Rect& padL, SDL_Rect& padR) {
+int Ball::move(SDL_FRect& padL, SDL_FRect& padR) {
     rect.x += speedX;
     rect.y += speedY;
 
@@ -50,20 +49,20 @@ void Ball::setSpeed(int speed) {
     speedY = speed;
 }
 
-void Ball::colisionPad(SDL_Rect& pad) {
-    if (SDL_HasIntersection(&rect, &pad)) {
-        int ballCenterX = rect.x + rect.w / 2;
-        int ballCenterY = rect.y + rect.h / 2;
-        int padCenterX  = pad.x + pad.w / 2;
-        int padCenterY  = pad.y + pad.h / 2;
+void Ball::colisionPad(SDL_FRect& pad) {
+    if (SDL_HasIntersectionF(&rect, &pad)) {
+        float ballCenterX = rect.x + rect.w / 2;
+        float ballCenterY = rect.y + rect.h / 2;
+        float padCenterX  = pad.x + pad.w / 2;
+        float padCenterY  = pad.y + pad.h / 2;
 
-        int deltaX = ballCenterX - padCenterX;
-        int deltaY = ballCenterY - padCenterY;
+        float deltaX = ballCenterX - padCenterX;
+        float deltaY = ballCenterY - padCenterY;
 
-        int intersectX = (rect.w + pad.w) / 2 - abs(deltaX);
-        int intersectY = (rect.h + pad.h) / 2 - abs(deltaY);
+        float intersectX = (rect.w + pad.w) / 2 - abs(deltaX);
+        float intersectY = (rect.h + pad.h) / 2 - abs(deltaY);
 
-        const int PUSH_EPS = 1;
+        const float PUSH_EPS = 1.0f;
 
         if (intersectX < intersectY && !collidedX) {
             if (deltaX > 0)

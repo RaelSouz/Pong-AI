@@ -1,7 +1,7 @@
 #include <Game.h>
 
 Game::Game(int width, int height, int frameRate) :
-    win_w(width), win_h(height), scoreL(0), scoreR(0),
+    win_w(static_cast<float>(width)), win_h(static_cast<float>(height)), scoreL(0), scoreR(0),
     frameDelay(1000 / frameRate), gameState(GameState::onInitialScene),
     window(nullptr), renderer(nullptr), initialBackground(nullptr), runningBackground(nullptr),
     event(), padL(nullptr), padR(nullptr), ball(nullptr),
@@ -11,27 +11,29 @@ Game::Game(int width, int height, int frameRate) :
 {}
 
 Game::~Game() {
-    if(padL) delete padL;
-    if(padR) delete padR;
-    if(ball) delete ball;
-    if(scoreLabelL) delete scoreLabelL;
-    if(scoreLabelR) delete scoreLabelR;
-    if(title) delete title;
-    if(pressKey) delete pressKey;
-    if(infoPause) delete infoPause;
-    if(infoQuit) delete infoQuit;
-    if(victoryTitle) delete victoryTitle;
-    if(infoRestartSame) delete infoRestartSame;
-    if(infoRestartNew) delete infoRestartNew;
     if(window) SDL_DestroyWindow(window);
     if(renderer) SDL_DestroyRenderer(renderer);
     if(initialBackground) SDL_DestroyTexture(initialBackground);
     if(runningBackground) SDL_DestroyTexture(runningBackground);
+    if(endBackground) SDL_DestroyTexture(endBackground);
+    if(padL) delete padL;
+    if(padR) delete padR;
+    if(ball) delete ball;
     if(scoreFont) utils::closeFont(scoreFont);
     if(titleFont) utils::closeFont(titleFont);
     if(pressKeyFont) utils::closeFont(pressKeyFont);
     if(infoFont) utils::closeFont(infoFont);
     if(victoryFont) utils::closeFont(victoryFont);
+    if(scoreLabelL) delete scoreLabelL;
+    if(scoreLabelR) delete scoreLabelR;
+    if(title) delete title;
+    if(victoryTitle) delete victoryTitle;
+    if(pressKey) delete pressKey;
+    if(infoRetry) delete infoRetry;
+    if(infoRestartSame) delete infoRestartSame;
+    if(infoRestartNew)delete infoRestartNew;
+    if(infoPause) delete infoPause;
+    if(infoQuit) delete infoQuit;
     if(net) delete net;
     SDL_Quit();
 }
@@ -112,8 +114,8 @@ int Game::handle() {
                 gameState = GameState::onEnd;
             }
             
-            SDL_Rect rPadL = padL->getRect();
-            SDL_Rect rPadR = padR->getRect();
+            SDL_FRect rPadL = padL->getRect();
+            SDL_FRect rPadR = padR->getRect();
             sideCollision = ball->move(rPadL, rPadR);
             if(sideCollision == 1) {
                 scoreR++;
@@ -224,23 +226,23 @@ int Game::createRunningScene() {
     SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
     SDL_RenderClear(renderer);
 
-    SDL_Rect border = {.x = 0, .y = 0, .w = win_w, .h = V_BORDER_H};
+    SDL_FRect border = {.x = 0, .y = 0, .w = win_w, .h = V_BORDER_H};
     SDL_SetRenderDrawColor(renderer, V_BORDER_COLOR);
-    SDL_RenderFillRect(renderer, &border);
+    SDL_RenderFillRectF(renderer, &border);
     border.y = win_h - border.h;
-    SDL_RenderFillRect(renderer, &border);
+    SDL_RenderFillRectF(renderer, &border);
 
     int numDot = (win_h / V_DOT_H) / 2;
     int distance = (win_h - V_DOT_H) / numDot;
-    SDL_Rect dot = {.x = (win_w / 2) - (V_DOT_W / 2), .y = V_DOT_H, .w = V_DOT_W, .h = V_DOT_H};
+    SDL_FRect dot = {.x = (win_w / 2) - (V_DOT_W / 2), .y = V_DOT_H, .w = V_DOT_W, .h = V_DOT_H};
     for(int i = 0; i < numDot && dot.y < win_h; i++) {
-        SDL_RenderFillRect(renderer, &dot);
+        SDL_RenderFillRectF(renderer, &dot);
         dot.y += distance;
     }
 
     SDL_SetRenderTarget(renderer, NULL);
 
-    const SDL_Rect ACTIVE_AREA{.x = 0, .y = V_BORDER_H, .w = win_w, .h = win_h - (2 * V_BORDER_H)};
+    const SDL_FRect ACTIVE_AREA{.x = 0, .y = V_BORDER_H, .w = win_w, .h = win_h - (2 * V_BORDER_H)};
     padL = new Pad(
         ACTIVE_AREA,
         {.x = H_PADDING, .y = PAD_INITIAL_HEIGHT, .w = PAD_WIDTH, .h = PAD_HEIGHT}, {PAD_COLOR}

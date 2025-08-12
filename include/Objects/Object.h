@@ -4,22 +4,22 @@
 
 class Object {
     public:
-        Object(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
+        Object(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color);
         virtual ~Object();
 
-        void setRect(int w, int h, int x, int y);
-        SDL_Rect getRect();
+        void setRect(float w, float h, float x, float y);
+        const SDL_FRect getRect() const;
         void setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-        SDL_Color getColor();
-        void setSpeed(int speed);
-        int getSpeed();
-        void setPos(int x, int y);
+        const SDL_Color getColor() const;
+        void setSpeed(float speed);
+        const float getSpeed() const;
+        void setPos(float x, float y);
         void draw(SDL_Renderer* renderer);
 
     protected:
-        SDL_Rect rect, activeArea;
+        SDL_FRect rect, activeArea;
         SDL_Color color;
         SDL_Renderer* ptrRenderer;
         int win_w, win_h;
-        int speed;
+        float speed;
 };

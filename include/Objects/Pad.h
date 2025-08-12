@@ -4,7 +4,7 @@
 
 class Pad : public Object {
     public:
-        Pad(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color);
+        Pad(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color);
         ~Pad();
         
         void move(bool up);

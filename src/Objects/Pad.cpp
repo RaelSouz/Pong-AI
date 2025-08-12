@@ -1,6 +1,6 @@
 #include <Objects/Pad.h>
 
-Pad::Pad(SDL_Rect activeArea, SDL_Rect rect, SDL_Color color) :
+Pad::Pad(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color) :
     Object(activeArea, rect, color) { }
 
 Pad::~Pad() {}

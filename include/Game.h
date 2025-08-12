@@ -28,7 +28,7 @@ class Game {
         SDL_Texture* endBackground;
         SDL_Event event;
 
-        int win_w, win_h;
+        float win_w, win_h;
         int scoreL, scoreR;
         int frameDelay;
         GameState gameState;

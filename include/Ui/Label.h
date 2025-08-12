@@ -17,14 +17,14 @@ class Label {
 
         void setFont(Font* font, SDL_Color color);
         int setText(SDL_Renderer* renderer, std::string  text);
-        void setPosition(int posX, int posY);
-        SDL_Rect getRect();
+        void setPosition(float posX, float posY);
+        const SDL_FRect getRect() const;
         void draw(SDL_Renderer* renderer);
 
     private:
         Font* font;
         SDL_Texture* texture;
-        SDL_Rect rect;
+        SDL_FRect rect;
         SDL_Color color;
 };
 

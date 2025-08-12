@@ -29,16 +29,16 @@ int Label::setText(SDL_Renderer* renderer, std::string  text) {
     return 0;
 }
 
-void Label::setPosition(int posX, int posY) {
+void Label::setPosition(float posX, float posY) {
     rect.x = posX, rect.y = posY;
 }
 
-SDL_Rect Label::getRect() {
+const SDL_FRect Label::getRect() const {
     return rect;
 }
 
 void Label::draw(SDL_Renderer* renderer) {
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_RenderCopyF(renderer, texture, NULL, &rect);
 }
 
 int utils::initFonts() {
