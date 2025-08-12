@@ -112,7 +112,9 @@ int Game::handle() {
                 gameState = GameState::onEnd;
             }
             
-            sideCollision = ball->move(padL, padR);
+            SDL_Rect rPadL = padL->getRect();
+            SDL_Rect rPadR = padR->getRect();
+            sideCollision = ball->move(rPadL, rPadR);
             if(sideCollision == 1) {
                 scoreR++;
                 updateScore(SCORE_RIGHT);
@@ -148,7 +150,7 @@ int Game::handle() {
             victoryTitle->draw(renderer);
         }
 
-        renderScene();
+        if(gameState != GameState::onPaused) renderScene();
     }
     return 0;
 }
@@ -305,7 +307,7 @@ int Game::updateScore(bool isLeft) {
 void Game::onRestart(bool isSame) {
     padL->setPos(padL->getRect().x, PAD_INITIAL_HEIGHT);
     padR->setPos(padR->getRect().x, PAD_INITIAL_HEIGHT);
-    ball->randomPos();
+    ball->reset();
     scoreL = 0, scoreR = 0;
     updateScore(SCORE_LEFT);
     updateScore(SCORE_RIGHT);

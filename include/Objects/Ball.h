@@ -10,15 +10,15 @@ class Ball : public Object {
         ~Ball();
 
 
-        int move(Pad* padL, Pad* padR);
+        int move(SDL_Rect& padL, SDL_Rect& padR);
         void setSpeed(int speed);
-        void randomPos();
+        void reset();
 
     private:
         std::mt19937 gen;
         std::uniform_int_distribution<int> dist;
         int speedX, speedY;
+        bool collidedX, collidedY;
 
-        int collisionWall();
-        void colisionPad(Pad* pad);
+        void colisionPad(SDL_Rect& pad);
 };
