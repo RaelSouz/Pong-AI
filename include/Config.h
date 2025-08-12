@@ -5,8 +5,8 @@
 #define AI_THRESHOLD 0.01
 #define INITIAL_ANIM_TIME 1000
 #define POINTS_WIN_CONDICION 24
-#define BALL_SPEED 6
-#define PAD_SPEED 7
+#define BALL_SPEED 350
+#define PAD_SPEED 400
 #define PAD_WIDTH 15
 #define PAD_HEIGHT 100
 #define BALL_SIZE 12

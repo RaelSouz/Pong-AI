@@ -7,6 +7,6 @@ class Pad : public Object {
         Pad(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color);
         ~Pad();
         
-        void move(bool up);
+        void move(float deltaTime, bool up);
 
 };

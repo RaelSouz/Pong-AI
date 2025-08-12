@@ -1,6 +1,7 @@
 #include <Game.h>
 
-Game game(900, 600, 60);
+// FPS = 0 | Configura para ilimitado
+Game game(900, 600, 0);
 
 int main() {
     if(game.init() == 0) {

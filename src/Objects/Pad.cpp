@@ -5,8 +5,8 @@ Pad::Pad(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color) :
 
 Pad::~Pad() {}
 
-void Pad::move(bool up) {
-    rect.y += up ? (-1 * speed) : speed;
+void Pad::move(float deltaTime, bool up) {
+    rect.y += up ? (-1 * (speed * deltaTime)) : (speed * deltaTime);
     if(rect.y <= activeArea.y) {
         rect.y = activeArea.y;  // Colisão superior
     }

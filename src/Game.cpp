@@ -2,13 +2,14 @@
 
 Game::Game(int width, int height, int frameRate) :
     win_w(static_cast<float>(width)), win_h(static_cast<float>(height)), scoreL(0), scoreR(0),
-    frameDelay(1000 / frameRate), gameState(GameState::onInitialScene),
+    gameState(GameState::onInitialScene),
     window(nullptr), renderer(nullptr), initialBackground(nullptr), runningBackground(nullptr),
     event(), padL(nullptr), padR(nullptr), ball(nullptr),
     scoreFont(nullptr), titleFont(nullptr), pressKeyFont(nullptr), infoFont(nullptr),
     scoreLabelL(nullptr), scoreLabelR(nullptr), title(nullptr), pressKey(nullptr), infoPause(nullptr), infoQuit(nullptr),
-    net()
-{}
+    net() {
+        frameDelay = (frameRate <= 0) ? 0 : (1000 / frameRate);
+    }
 
 Game::~Game() {
     if(window) SDL_DestroyWindow(window);
@@ -90,11 +91,18 @@ int Game::handle() {
     int sideCollision;
     vec input(3);
     float out;
-    Uint32 currentTime, lastToggleTime = 0;
+    float deltaTime;
+    Uint64 currentTime, lastToggleTime = 0;
+    Uint64 deltaNow, deltaLastTime = SDL_GetPerformanceCounter();
     bool showText = false;
   
     while(gameState != GameState::onQuit) {
         eventHandle();
+        // Controle de velocidade independente do FPS
+        deltaNow = SDL_GetPerformanceCounter(); 
+        deltaTime = (deltaNow - deltaLastTime) / (float)SDL_GetPerformanceFrequency();
+        deltaLastTime = deltaNow;
+
         if(gameState == GameState::onInitialScene) {
             currentTime = SDL_GetTicks64();
             if(currentTime - lastToggleTime >= INITIAL_ANIM_TIME) {
@@ -116,28 +124,30 @@ int Game::handle() {
             
             SDL_FRect rPadL = padL->getRect();
             SDL_FRect rPadR = padR->getRect();
-            sideCollision = ball->move(rPadL, rPadR);
+            sideCollision = ball->move(deltaTime, rPadL, rPadR);
             if(sideCollision == 1) {
                 scoreR++;
+                ball->reset();
                 updateScore(SCORE_RIGHT);
             } else if(sideCollision == 2) {
                 scoreL++;
+                ball->reset();
                 updateScore(SCORE_LEFT);
                 net->backPropagation(((input[1] < input[2] ) ? 1 : -1), AI_LEARN_RATE);    // Target = BallCenterY < PadCenterY ? 1 : -1;
             }
 
             SDL_PumpEvents();   // Atualização da captura de teclas
             // Jogador
-            if(kbState[SDL_SCANCODE_W]) padL->move(true);
-            else if(kbState[SDL_SCANCODE_S]) padL->move(false);
+            if(kbState[SDL_SCANCODE_W]) padL->move(deltaTime, true);
+            else if(kbState[SDL_SCANCODE_S]) padL->move(deltaTime, false);
         
             // AI
             input[0] = nnet::normalizeTanh(ball->getRect().x + (ball->getRect().w/ 2), 0, win_w);   // BallCenterX
             input[1] = nnet::normalizeTanh(ball->getRect().y + (ball->getRect().h / 2), 0, win_h);  // BallCenterY
             input[2] = nnet::normalizeTanh(padR->getRect().y + (padR->getRect().h / 2), 0, win_h);  // PadCenterY
             out = net->feedFoward(input);
-            if(out > AI_THRESHOLD) padR->move(true);    // Move Up
-            else if(out < -AI_THRESHOLD) padR->move(false); // Move Down
+            if(out > AI_THRESHOLD) padR->move(deltaTime, true);    // Move Up
+            else if(out < -AI_THRESHOLD) padR->move(deltaTime, false); // Move Down
     
             SDL_RenderCopy(renderer, runningBackground, NULL, NULL);
             scoreLabelL->draw(renderer);
@@ -259,6 +269,7 @@ int Game::createRunningScene() {
         {.w = BALL_SIZE, .h = BALL_SIZE}, {BALL_COLOR}
     );
     ball->setSpeed(BALL_SPEED);
+    ball->reset();
 
     scoreLabelL = new Label(scoreFont, {FONT_SCORE_COLOR});
     scoreLabelR = new Label(scoreFont, {FONT_SCORE_COLOR});

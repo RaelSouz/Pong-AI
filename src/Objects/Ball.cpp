@@ -3,9 +3,7 @@
 Ball::Ball(SDL_FRect activeArea, SDL_FRect rect, SDL_Color color) :
     Object(activeArea, rect, color), gen(std::random_device{}()),
     collidedX(false), collidedY(false),
-    dist(std::uniform_int_distribution<int>(activeArea.h * 0.1f, activeArea.h * 0.9f)) {
-    reset();
-}
+    dist(std::uniform_int_distribution<int>(activeArea.h * 0.1f, activeArea.h * 0.9f)) { }
 
 Ball::~Ball() {}
 
@@ -16,24 +14,25 @@ void Ball::reset() {
     speedY *= (dist(gen) % 2) ? -1.0f : 1.0f;
 }
 
-int Ball::move(SDL_FRect& padL, SDL_FRect& padR) {
-    rect.x += speedX;
-    rect.y += speedY;
+int Ball::move(float deltaTime, SDL_FRect& padL, SDL_FRect& padR) {
+    rect.x += speedX * deltaTime;
+    rect.y += speedY * deltaTime;
 
-    if(rect.y <= activeArea.y) {    // Colisão superior
+    // Colisão superior ou inferior
+    if(rect.y <= activeArea.y) {    
         rect.y = activeArea.y;
-        speedY *= -1;
+        speedY = -speedY;
     }
-    else if((rect.y + rect.h) >= (activeArea.y + activeArea.h)) {   // Colisão inferior
+    else if((rect.y + rect.h) >= (activeArea.y + activeArea.h)) {
         rect.y = (activeArea.y + activeArea.h) - rect.h;
-        speedY *= -1;
+        speedY = -speedY;
     }
-    else if((rect.x + rect.w) <= activeArea.x) {   // Colisão lateral esquerda
-        reset(); 
+    // Colisão lateral esquerda
+    if((rect.x + rect.w) <= activeArea.x) {   
         return 1;
     }
-    else if(rect.x >= (activeArea.x + activeArea.w)) {  // Colisão lateral direita
-        reset();
+    // Colisão lateral direita
+    if(rect.x >= (activeArea.x + activeArea.w)) {
         return 2;
     }
 
@@ -50,44 +49,33 @@ void Ball::setSpeed(int speed) {
 }
 
 void Ball::colisionPad(SDL_FRect& pad) {
-    if (SDL_HasIntersectionF(&rect, &pad)) {
-        float ballCenterX = rect.x + rect.w / 2;
-        float ballCenterY = rect.y + rect.h / 2;
-        float padCenterX  = pad.x + pad.w / 2;
-        float padCenterY  = pad.y + pad.h / 2;
-
-        float deltaX = ballCenterX - padCenterX;
-        float deltaY = ballCenterY - padCenterY;
-
-        float intersectX = (rect.w + pad.w) / 2 - abs(deltaX);
-        float intersectY = (rect.h + pad.h) / 2 - abs(deltaY);
-
-        const float PUSH_EPS = 1.0f;
-
-        if (intersectX < intersectY && !collidedX) {
-            if (deltaX > 0)
-                rect.x = pad.x + pad.w + PUSH_EPS;
-            else
-                rect.x = pad.x - rect.w - PUSH_EPS;
-
-            speedX = -speedX;
-            collidedX = true;
-            collidedY = false;
-        } else {
-            if (!collidedY) {
-                if (deltaY > 0)
-                    rect.y = pad.y + pad.h + PUSH_EPS;
-                else
-                    rect.y = pad.y - rect.h - PUSH_EPS;
-
-                speedY = -speedY;
-                collidedY = true;
-                collidedX = false;
-            }
-        }
-    } else {
+    if (!SDL_HasIntersectionF(&rect, &pad)) {
         collidedX = false;
         collidedY = false;
+        return;
     }
 
+    float ballCenterX = rect.x + rect.w / 2.0f;
+    float ballCenterY = rect.y + rect.h / 2.0f;
+    float padCenterX  = pad.x + pad.w / 2.0f;
+    float padCenterY  = pad.y + pad.h / 2.0f;
+
+    float deltaX = ballCenterX - padCenterX;
+    float deltaY = ballCenterY - padCenterY;
+
+    float intersectX = (rect.w + pad.w) / 2.0f - fabs(deltaX);
+    float intersectY = (rect.h + pad.h) / 2.0f - fabs(deltaY);
+
+    if (intersectX < intersectY && !collidedX) {
+        rect.x += (deltaX > 0 ? intersectX : -intersectX);
+        speedX = -speedX;
+        collidedX = true;
+        collidedY = false;
+    } 
+    else if (!collidedY) {
+        rect.y += (deltaY > 0 ? intersectY : -intersectY);
+        speedY = -speedY;
+        collidedY = true;
+        collidedX = false;
+    }
 }

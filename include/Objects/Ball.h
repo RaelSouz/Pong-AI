@@ -9,7 +9,7 @@ class Ball : public Object {
         ~Ball();
 
 
-        int move(SDL_FRect& padL, SDL_FRect& padR);
+        int move(float deltaTime, SDL_FRect& padL, SDL_FRect& padR);
         void setSpeed(int speed);
         void reset();
 
