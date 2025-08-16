@@ -1,5 +1,3 @@
-<!-- Local reservado para GIF demonstrativo -->
-
 ![Preview](/assets/preview.png)
 
 ![C++17](https://img.shields.io/badge/C++-17-blue)
@@ -30,34 +28,38 @@ Pode ser portado para outros sistemas, mas ajustes na configuração do SDL pode
 
 ---
 
-## Execução
+## Instalação e execução
 
 ```bash
-# 1. Clonar o repositório
+# Clonar o repositório
 git clone https://github.com/RaelSouz/Pong-AI.git
 
-# 2. Entrar na pasta do projeto
+# Entrar na pasta do projeto
 cd Pong-AI
 
-# 3. Criar diretório para arquivos de compilação
+# Criar diretório para build
 mkdir build && cd build
 
-# 4. Gerar arquivos de build com CMake
+# Gerar arquivos de build
 cmake ..
 
-# 5. Compilar o projeto usando make
+# Compilar o projeto
 make
 
-# 6. Executar o binário
+# Executar o jogo
 ./Pong-AI
 ```
 
 ## Rede Neural
 
-A inteligência artificial utiliza uma rede neural feedforward composta por:
+A AI utiliza uma rede neural feedforward simples:
 
 - **Camada de entrada**: posição da bola *(x, y)* e posição vertical da raquete *(y)*.
 - **Camada oculta**: 6 neurônios.
-- **Camada de saída**: 1 neurônio, cuja saída define o movimento da raquete (para cima ou para baixo).
+- **Camada de saída**: 1 neurônio que define o movimento da raquete (para cima ou para baixo).
 - **Treinamento**: backpropagation simples, ajustando pesos sempre que a IA perde um ponto.
 - **Função de ativação**: ```tanh```.
+
+## Licença
+
+Este projeto está licenciado sob a [MIT License](LICENSE).
